@@ -1,0 +1,17 @@
+# Version is deprecated with latest versions of Docker Engine
+# version: "3.9"
+services:
+  rsyslog:
+    image: ghcr.io/defendify/defendify-docker-concentrator:latest
+    environment:
+      - MEMORY_MESSAGES=2000000
+      - DISK_SPACE=180g
+      - REGION=USA1
+    ports:
+      - "20516-20566:20516-20566"
+      - "20516-20566:20516-20566/udp"
+    volumes:
+      - ./intakes.yaml:/intakes.yaml
+      - ./disk_queue:/var/spool/rsyslog
+    restart: always
+    pull_policy: always
