@@ -1,0 +1,17 @@
+---
+intakes:
+- name: TCP-Example-1
+  protocol: tcp
+  port: 20516
+  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-1
+- name: UDP-Example-1
+  protocol: udp
+  port: 20517
+  intake_key: INTAKE_KEY_FOR_UDP-EXAMPLE-1
+- name: TCP-Example-2
+  protocol: tcp
+  port: 20518
+  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-2
+- name: Forwarder
+  stats: true 
+  intake_key: INTAKE_KEY_FOR_FORWARDER_LOGS
