@@ -2,7 +2,7 @@
 # version: "3.9"
 services:
   rsyslog:
-    image: ghcr.io/defendify/defendify-docker-concentrator:latest
+    image: ghcr.io/defendify/defendify-docker-concentrator:2.7.1
     environment:
       - MEMORY_MESSAGES=2000000
       - DISK_SPACE=180g
