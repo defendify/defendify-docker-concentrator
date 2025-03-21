@@ -128,7 +128,7 @@ git clone https://github.com/defendify/defendify-docker-concentrator.git && cd d
 ```
 2. Pull the pre-made docker image:
 ```bash
-sudo docker pull ghcr.io/defendify/defendify-docker-concentrator
+sudo docker pull ghcr.io/defendify/defendify-docker-concentrator:2.7.1
 ```
 3. Enter the docker-compose directory:
 ```bash
