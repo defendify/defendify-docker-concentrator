@@ -22,7 +22,7 @@ To be able to run the container you need:
 * Latest version of Git. You will find all the installation processes on the [official website](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 * Latest version of Docker Engine. You will find all the installation processes on the [official website](https://docs.docker.com/engine/install/).
 > [!WARNING]
-> Make sure you follow the Docker Linux post-installtion steps. 
+> Make sure you follow the Docker Linux post-installation steps. 
 * INBOUND TCP or UDP flows opened between the systems/applications and the concentrator on the ports of your choice
 * OUTBOUND TCP flow opened towards:
   * **USA1** — intake.mdr.defendify.com on port 10514 
@@ -82,7 +82,7 @@ When debug is set to true, the raw event received and the output message will be
 To ease the deployment, a `docker-compose.yml` file is suggested and a template is given.
 
 #### Environment variables
-This image uses two environment variables to customize the container. These variables are used to define a queue for incoming logs in case there is an temporaly issue in transmitting events to Defendify. The queue stores messages in memory up to a certain number of events and then store them on disk.
+This image uses two environment variables to customize the container. These variables are used to define a queue for incoming logs in case there is a temporary issue in transmitting events to Defendify. The queue stores messages in memory up to a certain number of events and then store them on disk.
 
 ```yaml
 environment:
@@ -91,8 +91,8 @@ environment:
     - REGION=USA1
 ```
 * `MEMORY_MESSAGES=2000000` means the queue is allowed to store up to 2,000,000 messages in memory. If we consider a message size is 1.2KB, then you will use 2,4GB of RAM memory (2000000 * 1.2KB = 2.4GB).
-* `DISK_SPACE=180g` means the queue is allowed to store on disk up to 180 giga of messages.
-* `REGION=USA1` is the region where to send the logs. Currently only the `USA1` option is available.
+* `DISK_SPACE=180g` means the queue is allowed to store on disk up to 180 gigs of messages.
+* `REGION=USA1` is the region where to send the logs. Currently only the `USA1` option is available, but this here for futureproofing.
 
 [Here](#prerequisites) you will find recommendations to set these variables based on the number of assets. You can also define your own values, which should be chosen according to your virtual machine's template.
 
@@ -128,7 +128,7 @@ git clone https://github.com/defendify/defendify-docker-concentrator.git && cd d
 ```
 2. Pull the pre-made docker image:
 ```bash
-sudo docker pull ghcr.io/defendify/defendify-docker-concentrator:2.7.1
+sudo docker pull ghcr.io/defendify/defendify-docker-concentrator:2.7.1b
 ```
 3. Enter the docker-compose directory:
 ```bash
@@ -193,7 +193,7 @@ You can define your own method for obtaining logs using rsyslog modules, but you
 
 ```bash
 input(type="imtcp" port="20521" ruleset="remote20521")
-template(name="DEFENDIFY_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% MY-APP-NAME - LOG [DEFENDIFY@53288 intake_key=\"MY-INTAKE-KEY\"] %msg%\n")
+template(name="DEFENDIFY_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% MY-APP-NAME - LOG [SEKOIA@53288 intake_key=\"MY-INTAKE-KEY\"] %msg%\n")
 ruleset(name="remote20521"){
 action(
     name="action"
@@ -226,7 +226,7 @@ restart: always
 pull_policy: always
 ```
 
-* `restart: always`: this line indicates to restart the concentrator everytime it stops. That means if it crashes, if you restart Docker or if you restart the host, the concentrator will start automatically.
+* `restart: always`: this line indicates to restart the concentrator every time it stops. That means if it crashes, if you restart Docker or if you restart the host, the concentrator will start automatically.
 * `pull_policy: always`: docker compose will always try to pull the image from the registry and check if a new version is available for the tag specified.
 
 ## Configure TLS for an Intake
