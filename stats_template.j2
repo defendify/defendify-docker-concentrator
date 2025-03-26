@@ -1,4 +1,4 @@
-template(name="DEFENDIFY_stats_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% %app-name% %procid% LOG [DEFENDIFY@53288 intake_key=\"{{ intake_key }}\"] %msg%\n")
+template(name="DEFENDIFY_stats_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% %app-name% %procid% LOG [SEKOIA@53288 intake_key=\"{{ intake_key }}\"] %msg%\n")
 ruleset(name="stats"){
 action(
     name="output-{{ name |lower }}"

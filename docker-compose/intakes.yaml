@@ -13,5 +13,5 @@ intakes:
   port: 20518
   intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-2
 - name: Forwarder
-  stats: true 
+  stats: true
   intake_key: INTAKE_KEY_FOR_FORWARDER_LOGS
