@@ -181,45 +181,9 @@ To delete the container (container needs to be stopped):
 sudo docker compose rm
 ```
 
-## Advanced Installation
-#### Import a custom rsyslog configuration 
+## Additional configuration options
 
-You can add your own additional rsyslog configuration. It can be useful to deal with specific use cases which are not supported natively by the Defendify concentrator. To enable it, you simply have to create a new folder called `extended_conf` and put an additional rsyslog file into that folder (your file must have the extension \*.conf). 
-
-> [!TIP]
-> If you follow this process, you do not have to deal with the `intake.yaml` file. Your custom configuration will be added in addition to the intake definition and will not erase existing ones. If you have the same information in both the custom file and the `intake.yaml`, you will receive errors.
- 
-You can define your own method for obtaining logs using rsyslog modules, but you still need to forward events to Defendify by providing a syslog-valid message with your intake key as a header, as follows:
-
-```bash
-input(type="imtcp" port="20521" ruleset="remote20521")
-template(name="DEFENDIFY_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% MY-APP-NAME - LOG [SEKOIA@53288 intake_key=\"MY-INTAKE-KEY\"] %msg%\n")
-ruleset(name="remote20521"){
-action(
-    name="action"
-    type="omfwd"
-    protocol="tcp"
-    target="intake.mdr.defendify.com"
-    port="10514"
-    TCP_Framing="octet-counted"
-    StreamDriver="gtls"
-    StreamDriverMode="1"
-    StreamDriverAuthMode="anon"    
-    Template="DEFENDIFY_Template"
-    )
-}
-```
-
-Once additional configuration has been added, you simply have to mount them in the docker as following: 
-
-```yaml
-volumes:
-    - ./intakes.yaml:/intakes.yaml
-    - ./extended_conf:/extended_conf
-    - ./disk_queue:/var/spool/rsyslog
-```
-
-#### Additional options
+There are additional options you can tweak in the `docker-compose.yml` file within `/docker-compose`.
 
 ```yaml
 restart: always
@@ -312,4 +276,4 @@ docker build . -t defendify-docker-concentrator:latest
 ```
 
 > [!CAUTION]
-> Be sure to adapt the `docker-compose.yml` accordingly and change `image: ghcr.io/defendify/defendify-docker-concentrator:x` by `image: defendify-docker-concentrator:latest` if you use this method.
+> Be sure to adapt the `docker-compose.yml` accordingly and change `image: ghcr.io/defendify/defendify-docker-concentrator:x` to `image: defendify-docker-concentrator:latest` if you use this method.
