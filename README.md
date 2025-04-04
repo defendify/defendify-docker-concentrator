@@ -10,7 +10,7 @@ The build is based on Ubuntu 22.04 and will install all the required components.
 To be able to run the container you need:
 
 * A x86-64 Linux host using one of these templates:
-  | Number of assets |  vCPUs |  RAM (Go) | Disk size (Go) | Defendify concentrator settings                |
+  | Number of assets |  vCPUs |  RAM (GB) | Disk size (GB) | Defendify concentrator settings                |
   |------------------|:------:|:---------:|:--------------:|:-------------------------------------------:|
   | 1000             |    2   |   4       |      200       |  MEMORY_MESSAGES=2000000 / DISK_SPACE=180g  |
   | 10 000           |    4   |   8       |      1000      |  MEMORY_MESSAGES=5000000 / DISK_SPACE=980g  |
