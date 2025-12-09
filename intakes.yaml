@@ -1,17 +1,25 @@
+# This is where we configure the intakes for data we will be sending to the Defendify MDR Platform.
+# This is written in YAML, so the spacing is important.
+# Each entry starts with a -
+# 
+# name: This is the name that will show up on internal logging. No spaces allowed!
+# protocol: This will either be tcp or udp, depending on what is required
+# port: The dedicated port that the data will arrive on.
+# intake_key: This is a 32 character random string that is unique.
+#
+# After the intakes, we have the information for the Log Forwarder's Logs.
+# This also has a 32 character random string.
+
 ---
 intakes:
-- name: TCP-Example-1
-  protocol: tcp
-  port: 20516
-  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-1
-- name: UDP-Example-1
-  protocol: udp
-  port: 20517
-  intake_key: INTAKE_KEY_FOR_UDP-EXAMPLE-1
-- name: TCP-Example-2
-  protocol: tcp
-  port: 20518
-  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-2
+- name: FIRST_INTAKE
+  protocol: 
+  port: 
+  intake_key: FIRST_KEY
+- name: SECOND_INTAKE
+  protocol: 
+  port: 
+  intake_key: SECOND_KEY
 - name: Forwarder
-  stats: true 
+  stats: true
   intake_key: INTAKE_KEY_FOR_FORWARDER_LOGS

@@ -34,12 +34,12 @@ cd docker-compose
 > [!TIP]
 > If you are unfamiliar and/or uncomfortable with Linux, you may have an easier time with the Tilde text editor instead. To install this, you can run:
 > ```bash
-sudo apt install -y tilde
-```
+> sudo apt install -y tilde
+> ```
 > You can then use Tilde instead of Nano to open files by doing the following:
 > ```bash
-tilde example_file.txt
-```
+> tilde example_file.txt
+> ```
 > Just replace every instance of the `nano` command below with `tilde`.
 
 4.  Edit the docker-compose.yml file to fit your specifications:
@@ -122,14 +122,14 @@ In the `intakes` key, specify:
 ```yaml
 ---
 intakes:
-- name: TCP-Example-1
+- name: Example-1
   protocol: tcp
-  port: 20516
-  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE-1
-- name: UDP-Example-1
+  port: 514
+  intake_key: INTAKE_KEY_FOR_TCP-EXAMPLE
+- name: Example-2
   protocol: udp
-  port: 20517
-  intake_key: INTAKE_KEY_FOR_UDP-EXAMPLE-1
+  port: 515
+  intake_key: INTAKE_KEY_FOR_UDP-EXAMPLE
 ```
 
 #### Debug 
@@ -137,8 +137,8 @@ A debug variable is available in order to debug a specific intake, for example
 ```yaml
 - name: Debug_Example
   protocol: tcp
-  port: 20516
-  intake_key: ***
+  port: 514
+  intake_key: INTAKE_KEY_FOR_DEBUG-EXAMPLE
   debug: true
 ```
 
