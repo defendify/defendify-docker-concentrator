@@ -2,14 +2,14 @@
 # version: "3.9"
 services:
   rsyslog:
-    image: ghcr.io/defendify/defendify-docker-concentrator:2.7.1b
+    image: ghcr.io/defendify/defendify-docker-concentrator:2.8
     environment:
       - MEMORY_MESSAGES=2000000
       - DISK_SPACE=180g
       - REGION=USA1
     ports:
-      - "20516-20566:20516-20566"
-      - "20516-20566:20516-20566/udp"
+      - "PORTSTART-PORTEND:PORTSTART-PORTEND"
+      - "PORTSTART-PORTEND:PORTSTART-PORTEND/udp"
     volumes:
       - ./intakes.yaml:/intakes.yaml
       - ./disk_queue:/var/spool/rsyslog
