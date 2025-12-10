@@ -15,11 +15,11 @@ intakes:
 - name: FIRST_INTAKE
   protocol: 
   port: 
-  intake_key: ******
+  intake_key: FIRST_KEY
 - name: SECOND_INTAKE
   protocol: 
   port: 
-  intake_key: ******
+  intake_key: SECOND_KEY
 - name: Forwarder
   stats: true
   intake_key: INTAKE_KEY_FOR_FORWARDER_LOGS
