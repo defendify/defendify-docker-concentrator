@@ -105,6 +105,16 @@ To be able to run the container you need:
 * OUTBOUND TCP flow opened towards:
   * **USA1** — intake.mdr.defendify.com on port 10514
 
+### Disk considerations
+The disk only matters when the concentrator can't reach Defendify. During an outage, logs are queued on disk until the connection comes back, so the disk decides how long an outage you can ride out without losing logs.
+
+* Put the queue folder (`./disk_queue` in `docker-compose.yml`, mounted at `/var/spool/rsyslog`) on its own disk or partition, separate from the OS and Docker. At startup the concentrator caps the queues at `DISK_MAX_PERCENT` (80% by default) of whichever disk holds that folder. On a shared disk, anything else that grows after startup (OS logs, other containers, Docker images) eats into the same space, and the concentrator doesn't account for it.
+* Only 80% of the disk is used by default. With a dedicated 200 GB disk, the queues get about 160 GB. If `DISK_SPACE` is set higher than that, it's lowered at startup and a `WARNING` line is printed in the container logs.
+* Size the disk for the longest outage you want to survive: log rate × outage length × size on disk per log. Each log takes up about 1.5 times its raw size on disk. For example, 500 logs per second at 1 KB each is about 65 GB per day of outage, so a 1-day buffer needs roughly 80 GB of disk once the 80% cap is included.
+* The disk space is split evenly between every entry in `intakes.yaml` (including the forwarder monitoring entry) plus one main queue. With 4 intakes, the forwarder entry and `DISK_SPACE=180g`, each queue gets 30 GB. A busy intake can't borrow space from a quiet one, so size the disk for your busiest intake: its log rate × outage length × (number of entries + 1).
+* The limits are worked out once, at startup. After resizing the disk or adding intakes, restart the container so it recalculates.
+* Avoid restarting the concentrator during an outage. A restart loses some queued logs, see [Environment variables](#environment-variables).
+
 # Additional configuration options
 
 ## Docker-compose folder
@@ -114,9 +124,10 @@ The docker-compose folder contains the two files needed to start the container w
 The `intakes.yaml` file is used to tell Rsyslog what ports and intake keys to use.
 In the `intakes` key, specify:
 * a name (it has nothing to do with Defendify, it can be a random value)
-* the protocol, tcp or udp
+* the protocol, tcp, udp or tls
 * a port, to process incoming events
 * the intake key
+* optionally, `queue_size`: how many logs this intake can hold in memory. Without it, each intake gets `MEMORY_MESSAGES` divided by the number of intakes. This only sets the memory part of the queue. Disk space is always split evenly, see [Disk considerations](#disk-considerations).
 
 **Example**:
 ```yaml
@@ -130,6 +141,7 @@ intakes:
   protocol: udp
   port: 515
   intake_key: INTAKE_KEY_FOR_UDP-EXAMPLE
+  queue_size: 100000
 ```
 
 #### Debug 
@@ -174,15 +186,7 @@ Avoid restarting the concentrator during an outage, and especially while a queue
 * The output keeps retrying the batch of logs it was sending when the connection dropped. That batch has already left the queue, so it isn't saved on shutdown. This is at most 1024 logs per intake, and usually only a few.
 * On shutdown, rsyslog saves each queue's in-memory logs to disk, but a queue that's already at its disk limit has no room for them. Up to that intake's in-memory queue size of logs are lost.
 
-To give a specific intake its own in-memory queue size, add `queue_size` to it in `intakes.yaml`. Intakes without it keep the default of `MEMORY_MESSAGES` divided by the number of intakes.
-
-```yaml
-- name: Techno1
-  protocol: tcp
-  port: 20516
-  intake_key: INTAKE_KEY_FOR_TECHNO_1
-  queue_size: 100000
-```
+To give a specific intake its own in-memory queue size, add `queue_size` to it in `intakes.yaml` (see [intakes.yaml file](#intakesyaml-file)).
 
 [Here](#prerequisites) you will find recommendations to set these variables based on the number of assets. You can also define your own values, which should be chosen according to your virtual machine's template.
 
