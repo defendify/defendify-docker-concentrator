@@ -6,6 +6,8 @@
 # protocol: This will either be tcp, udp, or tls, depending on what is required
 # port: The dedicated port that the data will arrive on.
 # intake_key: This is a 32 character random string that is unique.
+# queue_size: Optional maximum number of logs held in memory for this intake.
+#   By default, MEMORY_MESSAGES is split evenly across intakes. Disk limits are unchanged.
 #
 # After the intakes, we have the information for the Log Forwarder's Logs.
 # This also has a 32 character random string.
