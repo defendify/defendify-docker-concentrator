@@ -92,9 +92,11 @@ To be able to run the container you need:
 * An x64 Linux host using one of these templates:
   | Number of assets |  vCPUs |  RAM (GB) | Disk size (GB) | Defendify concentrator settings                |
   |------------------|:------:|:---------:|:--------------:|:-------------------------------------------:|
-  | 1000             |    2   |   4       |      200       |  MEMORY_MESSAGES=2000000 / DISK_SPACE=180g  |
-  | 10 000           |    4   |   8       |      1000      |  MEMORY_MESSAGES=5000000 / DISK_SPACE=980g  |
-  | 50 000           |    6   |   16      |      5000      |  MEMORY_MESSAGES=12000000 / DISK_SPACE=4980g |
+  | 1000             |    2   |   4       |      200       |  MEMORY_MESSAGES=2000000 / DISK_SPACE=160g  |
+  | 10 000           |    4   |   8       |      1000      |  MEMORY_MESSAGES=5000000 / DISK_SPACE=800g  |
+  | 50 000           |    6   |   16      |      5000      |  MEMORY_MESSAGES=12000000 / DISK_SPACE=4000g |
+
+  Disk size is for a disk dedicated to the queue folder. `DISK_SPACE` is 80% of it, matching the default `DISK_MAX_PERCENT`. See [Disk considerations](#disk-considerations).
 
 > [!IMPORTANT]
 > These data are recommendations based on standards and observed averages on Defendify, so they may change depending on use cases.
@@ -111,7 +113,7 @@ The disk only matters when the concentrator can't reach Defendify. During an out
 * Put the queue folder (`./disk_queue` in `docker-compose.yml`, mounted at `/var/spool/rsyslog`) on its own disk or partition, separate from the OS and Docker. At startup the concentrator caps the queues at `DISK_MAX_PERCENT` (80% by default) of whichever disk holds that folder. On a shared disk, anything else that grows after startup (OS logs, other containers, Docker images) eats into the same space, and the concentrator doesn't account for it.
 * Only 80% of the disk is used by default. With a dedicated 200 GB disk, the queues get about 160 GB. If `DISK_SPACE` is set higher than that, it's lowered at startup and a `WARNING` line is printed in the container logs.
 * Size the disk for the longest outage you want to survive: log rate × outage length × size on disk per log. Each log takes up about 1.5 times its raw size on disk. For example, 500 logs per second at 1 KB each is about 65 GB per day of outage, so a 1-day buffer needs roughly 80 GB of disk once the 80% cap is included.
-* The disk space is split evenly between every entry in `intakes.yaml` (including the forwarder monitoring entry) plus one main queue. With 4 intakes, the forwarder entry and `DISK_SPACE=180g`, each queue gets 30 GB. A busy intake can't borrow space from a quiet one, so size the disk for your busiest intake: its log rate × outage length × (number of entries + 1).
+* The disk space is split evenly between every entry in `intakes.yaml` (including the forwarder monitoring entry) plus one main queue. With 4 intakes, the forwarder entry and `DISK_SPACE=160g`, each queue gets about 27 GB. A busy intake can't borrow space from a quiet one, so size the disk for your busiest intake: its log rate × outage length × (number of entries + 1).
 * The limits are worked out once, at startup. After resizing the disk or adding intakes, restart the container so it recalculates.
 * Avoid restarting the concentrator during an outage. A restart loses some queued logs, see [Environment variables](#environment-variables).
 
@@ -165,11 +167,11 @@ This image uses two environment variables to customize the container. These vari
 ```yaml
 environment:
     - MEMORY_MESSAGES=2000000
-    - DISK_SPACE=180g
+    - DISK_SPACE=160g
     - REGION=USA1
 ```
 * `MEMORY_MESSAGES=2000000` means the queues are allowed to store up to 2,000,000 messages in memory in total. If we consider a message size is 1.2KB, then you will use 2,4GB of RAM memory (2000000 * 1.2KB = 2.4GB). This value is split evenly across the configured intakes, so with 10 intakes each queue holds up to 200,000 messages.
-* `DISK_SPACE=180g` means all queues together are allowed to store on disk up to 180 gigs of messages. It's split evenly across the intake queues and the main queue.
+* `DISK_SPACE=160g` means all queues together are allowed to store on disk up to 160 gigs of messages. It's split evenly across the intake queues and the main queue.
 * `DISK_MAX_PERCENT=80` (optional, default `80`) keeps the host disk from filling up. At startup the concentrator checks the disk holding `/var/spool/rsyslog` and, if `DISK_SPACE` would push that disk past this percentage, lowers the queue limit to fit. The check only runs at startup, so space used by other programs afterwards isn't accounted for.
 * `REGION=USA1` is the region where to send the logs. Currently only the `USA1` option is available, but this here for futureproofing.
 

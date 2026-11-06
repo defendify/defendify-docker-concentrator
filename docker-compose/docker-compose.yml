@@ -5,7 +5,7 @@ services:
     image: ghcr.io/defendify/defendify-docker-concentrator:2.8.1
     environment:
       - MEMORY_MESSAGES=2000000
-      - DISK_SPACE=180g
+      - DISK_SPACE=160g
       - REGION=USA1
     ports:
       - "PORTSTART-PORTEND:PORTSTART-PORTEND"
