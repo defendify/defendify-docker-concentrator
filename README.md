@@ -168,6 +168,7 @@ This image uses two environment variables to customize the container. These vari
 environment:
     - MEMORY_MESSAGES=2000000
     - DISK_SPACE=160g
+    - DISK_MAX_PERCENT=80
     - REGION=USA1
 ```
 * `MEMORY_MESSAGES=2000000` means the queues are allowed to store up to 2,000,000 messages in memory in total. If we consider a message size is 1.2KB, then you will use 2,4GB of RAM memory (2000000 * 1.2KB = 2.4GB). This value is split evenly across the configured intakes, so with 10 intakes each queue holds up to 200,000 messages.

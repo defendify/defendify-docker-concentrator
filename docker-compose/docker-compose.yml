@@ -6,6 +6,7 @@ services:
     environment:
       - MEMORY_MESSAGES=2000000
       - DISK_SPACE=160g
+      - DISK_MAX_PERCENT=80
       - REGION=USA1
     ports:
       - "PORTSTART-PORTEND:PORTSTART-PORTEND"

@@ -3,11 +3,9 @@
 # Each entry starts with a -
 # 
 # name: This is the name that will show up on internal logging. No spaces allowed!
-# protocol: This will either be tcp or udp, depending on what is required
+# protocol: This will either be tcp, udp, or tls, depending on what is required
 # port: The dedicated port that the data will arrive on.
 # intake_key: This is a 32 character random string that is unique.
-# queue_size: (optional) Number of messages this intake can hold in memory.
-#             Defaults to MEMORY_MESSAGES divided by the number of intakes.
 #
 # After the intakes, we have the information for the Log Forwarder's Logs.
 # This also has a 32 character random string.
