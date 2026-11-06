@@ -1,5 +1,12 @@
+module(load="mmjsonparse")
+
 template(name="DEFENDIFY_stats_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% %app-name% %procid% LOG [SEKOIA@53288 intake_key=\"{{ intake_key }}\"] %msg%\n")
-ruleset(name="stats"){
+# Sent with syslog.warning priority (<44>) when a queue reports dropped messages
+template(name="DEFENDIFY_stats_Alert_Template" type="string" string="<44>1 %timegenerated:::date-rfc3339% %hostname% defendify-alert - LOG [SEKOIA@53288 intake_key=\"{{ intake_key }}\"] {\"origin\":\"defendify.alert\",\"event\":\"logs_dropped\",\"name\":\"%$!name%\",\"discarded.full\":%$!discarded.full%,\"discarded.nf\":%$!discarded.nf%,\"size\":%$!size%,\"message\":\"Concentrator queue %$!name% is full and dropped logs\"}\n")
+
+ruleset(name="stats" queue.type="LinkedList" queue.filename="DEFENDIFY_{{ name |lower }}_queue" queue.size="{{ queue_size }}" queue.maxDiskSpace="{{ disk_space }}" queue.saveOnShutdown="on"){
+action(type="mmjsonparse" cookie="")
+
 action(
     name="output-{{ name |lower }}"
     type="omfwd"
@@ -11,5 +18,25 @@ action(
     StreamDriverMode="1"
     StreamDriverAuthMode="anon"
     Template="DEFENDIFY_stats_Template"
+    action.resumeRetryCount="-1"
+    action.resumeInterval="30"
     )
+
+# impstats counters reset every interval, so any non-zero discard count is a new drop
+if $parsesuccess == "OK" and $!origin == "core.queue" and (cnum($!discarded.full) > 0 or cnum($!discarded.nf) > 0) then {
+    action(
+        name="alert-{{ name |lower }}"
+        type="omfwd"
+        protocol="tcp"
+        target="{{ endpoint }}"
+        port="10514"
+        TCP_Framing="octet-counted"
+        StreamDriver="gtls"
+        StreamDriverMode="1"
+        StreamDriverAuthMode="anon"
+        Template="DEFENDIFY_stats_Alert_Template"
+        action.resumeRetryCount="-1"
+        action.resumeInterval="30"
+        )
+}
 }

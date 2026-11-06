@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Base packages (present on both amd64 & arm64)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates wget rsyslog rsyslog-gnutls gettext-base \
+      ca-certificates wget rsyslog rsyslog-gnutls logrotate \
       python3 python3-yaml python3-jinja2 \
   && rm -rf /var/lib/apt/lists/*
 
@@ -19,6 +19,7 @@ RUN wget -O /DEFENDIFY-MDR-intake.pem https://assets.defendify.com/mdr/v2/DEFEND
 
 # Defaults (override at runtime)
 ENV DISK_SPACE=32g \
+    DISK_MAX_PERCENT=80 \
     MEMORY_MESSAGES=100000 \
     REGION=FRA1
 
@@ -35,7 +36,7 @@ COPY template_tls.j2 /template_tls.j2
 COPY stats_template.j2 /stats_template.j2
 
 # Hygiene
-RUN set -eux; sed -i 's/\r$//' /entrypoint.sh /generate_config.py || true; chmod +x /entrypoint.sh
+RUN set -eux; sed -i 's/\r$//' /entrypoint.sh /generate_config.py /etc/logrotate.d/rsyslog-imstats || true; chmod +x /entrypoint.sh; chmod 644 /etc/logrotate.d/rsyslog-imstats
 
 # OCI labels (nice for GHCR)
 LABEL org.opencontainers.image.title="Defendify Log Concentrator" \

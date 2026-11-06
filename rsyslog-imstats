@@ -1,4 +1,6 @@
 /var/log/rsyslog-stats.log {
+    # Ubuntu's /var/log is group-writable, which logrotate refuses without this
+    su root root
     size 10M
     rotate 3
     compress

@@ -22,7 +22,7 @@ git clone https://github.com/defendify/defendify-docker-concentrator.git && cd d
 ```
 2. Pull the pre-made docker image:
 ```bash
-sudo docker pull ghcr.io/defendify/defendify-docker-concentrator:2.8
+sudo docker pull ghcr.io/defendify/defendify-docker-concentrator:2.8.1
 ```
 3. Enter the docker-compose directory:
 ```bash
@@ -156,9 +156,33 @@ environment:
     - DISK_SPACE=180g
     - REGION=USA1
 ```
-* `MEMORY_MESSAGES=2000000` means the queue is allowed to store up to 2,000,000 messages in memory. If we consider a message size is 1.2KB, then you will use 2,4GB of RAM memory (2000000 * 1.2KB = 2.4GB).
-* `DISK_SPACE=180g` means the queue is allowed to store on disk up to 180 gigs of messages.
+* `MEMORY_MESSAGES=2000000` means the queues are allowed to store up to 2,000,000 messages in memory in total. If we consider a message size is 1.2KB, then you will use 2,4GB of RAM memory (2000000 * 1.2KB = 2.4GB). This value is split evenly across the configured intakes, so with 10 intakes each queue holds up to 200,000 messages.
+* `DISK_SPACE=180g` means all queues together are allowed to store on disk up to 180 gigs of messages. It's split evenly across the intake queues and the main queue.
+* `DISK_MAX_PERCENT=80` (optional, default `80`) keeps the host disk from filling up. At startup the concentrator checks the disk holding `/var/spool/rsyslog` and, if `DISK_SPACE` would push that disk past this percentage, lowers the queue limit to fit. The check only runs at startup, so space used by other programs afterwards isn't accounted for.
 * `REGION=USA1` is the region where to send the logs. Currently only the `USA1` option is available, but this here for futureproofing.
+
+When a queue reaches its disk limit, new logs for that intake are dropped right away until the connection to Defendify comes back and the backlog drains. Other intakes keep receiving logs as normal, and nothing needs to be restarted. If forwarder monitoring is set up (an intake with `stats: true`), the concentrator also sends a `logs_dropped` alert to the forwarder intake each time a queue drops logs:
+
+```json
+{"origin":"defendify.alert","event":"logs_dropped","name":"ruleset-techno1","discarded.full":1250,"discarded.nf":0,"size":666667,"message":"Concentrator queue ruleset-techno1 is full and dropped logs"}
+```
+
+Alerts are sent over the same connection as the logs, so during an outage they arrive once the connection is restored, timestamped when the drop happened.
+
+Avoid restarting the concentrator during an outage, and especially while a queue is at its disk limit. Restarts lose some queued logs in two ways, and neither shows up in `logs_dropped` alerts:
+
+* The output keeps retrying the batch of logs it was sending when the connection dropped. That batch has already left the queue, so it isn't saved on shutdown. This is at most 1024 logs per intake, and usually only a few.
+* On shutdown, rsyslog saves each queue's in-memory logs to disk, but a queue that's already at its disk limit has no room for them. Up to that intake's in-memory queue size of logs are lost.
+
+To give a specific intake its own in-memory queue size, add `queue_size` to it in `intakes.yaml`. Intakes without it keep the default of `MEMORY_MESSAGES` divided by the number of intakes.
+
+```yaml
+- name: Techno1
+  protocol: tcp
+  port: 20516
+  intake_key: INTAKE_KEY_FOR_TECHNO_1
+  queue_size: 100000
+```
 
 [Here](#prerequisites) you will find recommendations to set these variables based on the number of assets. You can also define your own values, which should be chosen according to your virtual machine's template.
 
@@ -189,10 +213,16 @@ There are additional options you can tweak in the `docker-compose.yml` file with
 ```yaml
 restart: always
 pull_policy: always
+logging:
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "3"
 ```
 
 * `restart: always`: this line indicates to restart the concentrator every time it stops. That means if it crashes, if you restart Docker or if you restart the host, the concentrator will start automatically.
 * `pull_policy: always`: docker compose will always try to pull the image from the registry and check if a new version is available for the tag specified.
+* `logging`: caps the container's console output (including `debug: true` output) at three 50 MB files. Without it, Docker keeps this output forever and it can fill the host's disk.
 
 ## Configure TLS for an Intake
 

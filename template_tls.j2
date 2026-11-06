@@ -1,4 +1,4 @@
-/input(type="imtcp"
+input(type="imtcp"
       port="{{ port }}"
       ruleset="ruleset-{{ name | lower}}"
       name="input-{{ name | lower}}"
@@ -16,7 +16,7 @@ template(name="DEFENDIFY_{{ name |lower }}_Output_Template" type="string" string
 
 
 template(name="DEFENDIFY_{{ name |lower }}_Template" type="string" string="<%pri%>1 %timegenerated:::date-rfc3339% %hostname% %app-name% %procid% LOG [SEKOIA@53288 intake_key=\"{{ intake_key }}\"] %msg:R,ERE,1,FIELD:^[ \t]*(.*)$--end%\n")
-ruleset(name="ruleset-{{ name | lower}}" queue.type="LinkedList" queue.filename="DEFENDIFY_{{ name |lower }}_queue" queue.saveOnShutdown="on"){
+ruleset(name="ruleset-{{ name | lower}}" queue.type="LinkedList" queue.filename="DEFENDIFY_{{ name |lower }}_queue" queue.size="{{ queue_size }}" queue.lightDelayMark="{{ queue_size }}" queue.timeoutEnqueue="0" queue.maxDiskSpace="{{ disk_space }}" queue.saveOnShutdown="on"){
 action(
     name="output-{{ name |lower }}"
     type="omfwd"
@@ -28,6 +28,8 @@ action(
     StreamDriverMode="1"
     StreamDriverAuthMode="anon"
     Template="DEFENDIFY_{{ name |lower }}_Template"
+    action.resumeRetryCount="-1"
+    action.resumeInterval="30"
     )
 
 {% if ( debug | lower ) == "true"  %}

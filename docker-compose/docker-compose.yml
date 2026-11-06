@@ -2,7 +2,7 @@
 # version: "3.9"
 services:
   rsyslog:
-    image: ghcr.io/defendify/defendify-docker-concentrator:2.8
+    image: ghcr.io/defendify/defendify-docker-concentrator:2.8.1
     environment:
       - MEMORY_MESSAGES=2000000
       - DISK_SPACE=180g
@@ -15,3 +15,8 @@ services:
       - ./disk_queue:/var/spool/rsyslog
     restart: always
     pull_policy: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
