@@ -4,7 +4,7 @@ The files in this repository are used to build and create a Docker container run
 
 To catch incoming events and apply the right intake key, this image processes each source on a specific TCP/UDP port.
 
-The build is based on Ubuntu 24.04 and will install all the required components. It will also determine if it is going to be running in an AMDx64 or ARMx64 environment and build itself accordingly. 
+The build is based on Ubuntu 26.04 and will install all the required components. It will also determine if it is going to be running in an AMDx64 or ARMx64 environment and build itself accordingly. 
 
 # Installation Process
 
